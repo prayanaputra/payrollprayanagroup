@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slip Gaji Prayana Mart</title>
+
+<style>
+*{box-sizing:border-box;font-family:Arial,sans-serif}
+body{
+  margin:0;
+  background:#f1f5f9;
+  padding:20px;
+  color:#111827;
+}
+.container{
+  max-width:900px;
+  margin:auto;
+  background:white;
+  padding:22px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+h1{text-align:center;margin:0;color:#111827}
+.sub{text-align:center;color:#64748b;margin:8px 0 20px}
+.tabs{display:flex;gap:10px;margin-bottom:18px}
+.tabs button{
+  flex:1;
+  padding:13px;
+  border:0;
+  border-radius:12px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.active{background:#111827;color:white}
+.inactive{background:#e5e7eb;color:#111827}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+label{
+  font-size:12px;
+  font-weight:bold;
+  margin-bottom:5px;
+  display:block;
+}
+input,select,textarea{
+  width:100%;
+  padding:11px;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  font-size:14px;
+}
+.section{
+  margin:20px 0 10px;
+  padding:8px 10px;
+  background:#e2e8f0;
+  font-weight:bold;
+  border-left:5px solid #111827;
+}
+button.main{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:12px;
+  background:#111827;
+  color:white;
+  font-weight:bold;
+  margin-top:16px;
+  cursor:pointer;
+}
+.hidden{display:none}
+.token-box{
+  background:#0f172a;
+  color:#f8fafc;
+  padding:15px;
+  border-radius:12px;
+  margin-top:15px;
+  word-break:break-all;
+  font-size:12px;
+}
+.slip{
+  margin-top:20px;
+  border:1px solid #333;
+  padding:0;
+  background:white;
+}
+.slip table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+.slip td,.slip th{
+  border:1px solid #333;
+  padding:6px;
+}
+.title{
+  font-size:20px;
+  font-weight:bold;
+}
+.right{text-align:right}
+.center{text-align:center}
+.bold{font-weight:bold}
+.total{background:#f1f5f9;font-weight:bold}
+.status-ok{color:green;font-weight:bold}
+.status-no{color:red;font-weight:bold}
+
+@media(max-width:700px){
+  .grid{grid-template-columns:1fr}
+  body{padding:10px}
+  .container{padding:15px}
+  .slip{overflow-x:auto}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>PRAYANA MART</h1>
+  <div class="sub">Sistem Slip Gaji Tanpa Database</div>
+
+  <div class="tabs">
+    <button id="btnBuat" class="active" onclick="showTab('buat')">Buat Slip</button>
+    <button id="btnCek" class="inactive" onclick="showTab('cek')">Cek Slip</button>
+  </div>
+
+  <div id="tabBuat">
+    <div class="section">Data Karyawan</div>
+    <div class="grid">
+      <div>
+        <label>NIK</label>
+        <input id="nik" placeholder="003040621">
+      </div>
+      <div>
+        <label>Nama</label>
+        <input id="nama" placeholder="Ni Wayan Desiari">
+      </div>
+      <div>
+        <label>Jabatan</label>
+        <input id="jabatan" placeholder="Cashier">
+      </div>
+      <div>
+        <label>Departemen</label>
+        <input id="departemen" value="Prayana Mart">
+      </div>
+      <div>
+        <label>Status PKWT</label>
+        <input id="status_pkwt" value="-">
+      </div>
+      <div>
+        <label>Status Payroll</label>
+        <input id="status_payroll" value="Tetap">
+      </div>
+      <div>
+        <label>Cut Off Payroll</label>
+        <input id="cutoff" placeholder="3 Mei - 2 Juni 2026">
+      </div>
+      <div>
+        <label>Tanggal Gajian</label>
+        <input type="date" id="tanggal_gajian">
+      </div>
+      <div>
+        <label>Periode Bulan</label>
+        <input type="month" id="periode">
+      </div>
+    </div>
+
+    <div class="section">Penerimaan</div>
+    <div class="grid">
+      <div><label>Gaji Pokok</label><input id="gaji_pokok" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Tunjangan Tetap</label><input id="tunjangan" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Insentif / Bonus / THR</label><input id="insentif" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Insentif Transport</label><input id="transport" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Insentif Kehadiran</label><input id="kehadiran" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Lembur / Extra Time</label><input id="lembur" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>BPJS TK Penerimaan</label><input id="bpjs_tk_terima" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+    </div>
+
+    <div class="section">Potongan</div>
+    <div class="grid">
+      <div><label>PPH 21</label><input id="pph" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Potongan Telat Hadir</label><input id="telat" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Potongan Pulang Awal</label><input id="pulang_awal" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Potongan Minus Kas Kasir</label><input id="minus_kas" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>LIBUR</label><input id="libur" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Kasbon</label><input id="kasbon" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>Potongan Ganti Rugi</label><input id="ganti_rugi" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+      <div><label>BPJS TK Potongan</label><input id="bpjs_tk_potong" oninput="rupiahInput(this);hitung()" placeholder="0"></div>
+    </div>
+
+    <div class="section">Total</div>
+    <div class="grid">
+      <div><label>Total Penerimaan</label><input id="total_penerimaan" readonly></div>
+      <div><label>Total Potongan</label><input id="total_potongan" readonly></div>
+      <div><label>Take Home Pay</label><input id="take_home_pay" readonly></div>
+    </div>
+
+    <div class="section">Catatan</div>
+    <textarea id="catatan" placeholder="Catatan tambahan..."></textarea>
+
+    <button class="main" onclick="buatSlip()">BUAT KODE SLIP</button>
+
+    <div id="tokenResult" class="token-box hidden"></div>
+    <button id="copyBtn" class="main hidden" onclick="copyToken()">SALIN KODE UNIK</button>
+
+    <div id="previewSlip"></div>
+  </div>
+
+  <div id="tabCek" class="hidden">
+    <div class="section">Cek Slip Gaji</div>
+    <label>Masukkan Kode Unik Slip</label>
+    <textarea id="kode_cek" placeholder="Tempel kode unik slip di sini"></textarea>
+    <button class="main" onclick="cekSlip()">CEK SLIP BULAN INI</button>
+    <div id="hasilCek"></div>
+  </div>
+</div>
+
+<script>
+let lastToken = "";
+
+function showTab(tab){
+  document.getElementById("tabBuat").classList.toggle("hidden",tab!=="buat");
+  document.getElementById("tabCek").classList.toggle("hidden",tab!=="cek");
+
+  document.getElementById("btnBuat").className = tab==="buat" ? "active" : "inactive";
+  document.getElementById("btnCek").className = tab==="cek" ? "active" : "inactive";
+}
+
+function angka(v){
+  return Number(String(v||"0").replace(/[^0-9]/g,"")) || 0;
+}
+
+function rupiah(n){
+  return "Rp" + new Intl.NumberFormat("id-ID").format(Number(n)||0) + ",00";
+}
+
+function rupiahInput(el){
+  let val = el.value.replace(/[^0-9]/g,"");
+  el.value = val ? new Intl.NumberFormat("id-ID").format(val) : "";
+}
+
+function v(id){
+  return angka(document.getElementById(id).value);
+}
+
+function hitung(){
+  let penerimaan =
+    v("gaji_pokok") +
+    v("tunjangan") +
+    v("insentif") +
+    v("transport") +
+    v("kehadiran") +
+    v("lembur") +
+    v("bpjs_tk_terima");
+
+  let potongan =
+    v("pph") +
+    v("telat") +
+    v("pulang_awal") +
+    v("minus_kas") +
+    v("libur") +
+    v("kasbon") +
+    v("ganti_rugi") +
+    v("bpjs_tk_potong");
+
+  let thp = penerimaan - potongan;
+
+  document.getElementById("total_penerimaan").value = rupiah(penerimaan);
+  document.getElementById("total_potongan").value = rupiah(potongan);
+  document.getElementById("take_home_pay").value = rupiah(thp);
+
+  return {penerimaan,potongan,thp};
+}
+
+function encodeData(data){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+
+function decodeData(token){
+  return JSON.parse(decodeURIComponent(escape(atob(token))));
+}
+
+function bulanSekarang(){
+  let d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+
+function buatSlip(){
+  let total = hitung();
+
+  let data = {
+    kode:"SLIP-PRAYANA-" + Date.now(),
+    dibuat:new Date().toLocaleString("id-ID"),
+    nik:document.getElementById("nik").value,
+    nama:document.getElementById("nama").value,
+    jabatan:document.getElementById("jabatan").value,
+    departemen:document.getElementById("departemen").value,
+    status_pkwt:document.getElementById("status_pkwt").value,
+    status_payroll:document.getElementById("status_payroll").value,
+    cutoff:document.getElementById("cutoff").value,
+    tanggal_gajian:document.getElementById("tanggal_gajian").value,
+    periode:document.getElementById("periode").value,
+
+    gaji_pokok:v("gaji_pokok"),
+    tunjangan:v("tunjangan"),
+    insentif:v("insentif"),
+    transport:v("transport"),
+    kehadiran:v("kehadiran"),
+    lembur:v("lembur"),
+    bpjs_tk_terima:v("bpjs_tk_terima"),
+
+    pph:v("pph"),
+    telat:v("telat"),
+    pulang_awal:v("pulang_awal"),
+    minus_kas:v("minus_kas"),
+    libur:v("libur"),
+    kasbon:v("kasbon"),
+    ganti_rugi:v("ganti_rugi"),
+    bpjs_tk_potong:v("bpjs_tk_potong"),
+
+    total_penerimaan:total.penerimaan,
+    total_potongan:total.potongan,
+    take_home_pay:total.thp,
+    catatan:document.getElementById("catatan").value
+  };
+
+  if(!data.nik || !data.nama || !data.periode){
+    alert("NIK, nama, dan periode bulan wajib diisi.");
+    return;
+  }
+
+  lastToken = encodeData(data);
+
+  document.getElementById("tokenResult").classList.remove("hidden");
+  document.getElementById("copyBtn").classList.remove("hidden");
+  document.getElementById("tokenResult").innerText = lastToken;
+
+  document.getElementById("previewSlip").innerHTML = renderSlip(data,false);
+}
+
+function copyToken(){
+  navigator.clipboard.writeText(lastToken);
+  alert("Kode unik berhasil disalin.");
+}
+
+function cekSlip(){
+  let token = document.getElementById("kode_cek").value.trim();
+
+  if(!token){
+    alert("Masukkan kode unik terlebih dahulu.");
+    return;
+  }
+
+  try{
+    let data = decodeData(token);
+
+    let status = "";
+    if(data.periode === bulanSekarang()){
+      status = `<p class="status-ok">Slip ini sesuai dengan bulan ini.</p>`;
+    }else{
+      status = `<p class="status-no">Slip ini bukan periode bulan ini. Periode slip: ${data.periode}</p>`;
+    }
+
+    document.getElementById("hasilCek").innerHTML = status + renderSlip(data,true);
+  }catch(e){
+    alert("Kode slip tidak valid atau rusak.");
+  }
+}
+
+function renderSlip(d, showPrint){
+  return `
+  <div class="slip" id="slipArea">
+    <table>
+      <tr>
+        <td colspan="3" class="title">Prayana Mart #BelanjaLebihHemat</td>
+        <td colspan="2" class="center title">SLIP GAJI PERIODE<br>${d.periode || "-"}</td>
+      </tr>
+
+      <tr><td>NIK</td><td>${d.nik}</td><td>Status PKWT</td><td colspan="2">${d.status_pkwt}</td></tr>
+      <tr><td>Nama</td><td>${d.nama}</td><td>Status Payroll</td><td colspan="2">${d.status_payroll}</td></tr>
+      <tr><td>Jabatan</td><td>${d.jabatan}</td><td>Cut Off Payroll</td><td colspan="2">${d.cutoff}</td></tr>
+      <tr><td>Departemen</td><td>${d.departemen}</td><td>Tanggal Gajian</td><td colspan="2">${d.tanggal_gajian}</td></tr>
+
+      <tr>
+        <th colspan="2">Penerimaan</th>
+        <th colspan="3">Potongan</th>
+      </tr>
+
+      <tr><td>Gaji Pokok</td><td class="right">${rupiah(d.gaji_pokok)}</td><td>PPH 21</td><td colspan="2" class="right">${rupiah(d.pph)}</td></tr>
+      <tr><td>Tunjangan Tetap</td><td class="right">${rupiah(d.tunjangan)}</td><td>Potongan Telat Hadir</td><td colspan="2" class="right">${rupiah(d.telat)}</td></tr>
+      <tr><td>Insentif / Bonus / THR</td><td class="right">${rupiah(d.insentif)}</td><td>Potongan Pulang Awal</td><td colspan="2" class="right">${rupiah(d.pulang_awal)}</td></tr>
+      <tr><td>Insentif Transport</td><td class="right">${rupiah(d.transport)}</td><td>Potongan Minus Kas Kasir</td><td colspan="2" class="right">${rupiah(d.minus_kas)}</td></tr>
+      <tr><td>Insentif Kehadiran</td><td class="right">${rupiah(d.kehadiran)}</td><td>LIBUR</td><td colspan="2" class="right">${rupiah(d.libur)}</td></tr>
+      <tr><td>Lembur / Extra Time</td><td class="right">${rupiah(d.lembur)}</td><td>Kasbon</td><td colspan="2" class="right">${rupiah(d.kasbon)}</td></tr>
+      <tr><td>BPJS TK</td><td class="right">${rupiah(d.bpjs_tk_terima)}</td><td>Potongan Ganti Rugi</td><td colspan="2" class="right">${rupiah(d.ganti_rugi)}</td></tr>
+      <tr><td></td><td></td><td>BPJS TK</td><td colspan="2" class="right">${rupiah(d.bpjs_tk_potong)}</td></tr>
+
+      <tr class="total">
+        <td>TOTAL PENERIMAAN</td>
+        <td class="right">${rupiah(d.total_penerimaan)}</td>
+        <td>TOTAL POTONGAN</td>
+        <td colspan="2" class="right">${rupiah(d.total_potongan)}</td>
+      </tr>
+
+      <tr class="total">
+        <td colspan="2">TAKE HOME PAY</td>
+        <td colspan="3" class="right">${rupiah(d.take_home_pay)}</td>
+      </tr>
+
+      <tr>
+        <td>Catatan:</td>
+        <td colspan="4">${d.catatan || ""}</td>
+      </tr>
+
+      <tr>
+        <td colspan="3"></td>
+        <td colspan="2" class="center">Denpasar, ${d.tanggal_gajian || "-"}</td>
+      </tr>
+
+      <tr>
+        <td colspan="3"></td>
+        <td class="center">Disetujui Oleh,</td>
+        <td class="center">Diterima Oleh,</td>
+      </tr>
+
+      <tr style="height:60px">
+        <td colspan="3"></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <tr>
+        <td colspan="3"></td>
+        <td class="center">Owner</td>
+        <td class="center">${d.nama}</td>
+      </tr>
+    </table>
+  </div>
+
+  ${showPrint ? `<button class="main" onclick="window.print()">PRINT SLIP</button>` : ""}
+  `;
+}
+</script>
+
+</body>
+</html>
